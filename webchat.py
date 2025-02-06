@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 
 # Cấu hình API của bạn
-API_KEY = os.getenv("API_KEY", "AIzaSyAOV0yJOqBrGu5iTMXbgLKKgg3BL6oOst00")  # Tùy chọn API Key từ biến môi trường
+API_KEY = os.getenv("API_KEY", "AIzaSyAOV0yJOqBrGu5iTMXbgLKKgg3BL6oOst0")  # Tùy chọn API Key từ biến môi trường
 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
 
 headers = {
