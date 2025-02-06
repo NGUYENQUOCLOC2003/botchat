@@ -1,7 +1,14 @@
+import os
 from flask import Flask, render_template, request, jsonify
 import requests
 
 app = Flask(__name__)
+
+# Các đoạn mã khác...
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
 # Cấu hình API của bạn
 API_KEY = "AIzaSyAOV0yJOqBrGu5iTMXbgLKKgg3BL6oOst0"  # Thay bằng API KEY thực tế của bạn
