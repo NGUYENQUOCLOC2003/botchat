@@ -4,14 +4,8 @@ import requests
 
 app = Flask(__name__)
 
-# Các đoạn mã khác...
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-
 # Cấu hình API của bạn
-API_KEY = "AIzaSyAOV0yJOqBrGu5iTMXbgLKKgg3BL6oOst0"  # Thay bằng API KEY thực tế của bạn
+API_KEY = os.getenv("API_KEY", "AIzaSyAOV0yJOqBrGu5iTMXbgLKKgg3BL6oOst0")  # Tùy chọn API Key từ biến môi trường
 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
 
 headers = {
@@ -65,7 +59,7 @@ Tài liệu học cho Chatbot về Quolocstore
    - Cung cấp thông tin tuyển dụng.
 """
 
-# Lịch sử hội thoại (ở ví dụ đơn giản, lưu trữ trong biến toàn cục)
+# Lịch sử hội thoại
 conversation_history = []
 
 @app.route("/")
@@ -76,11 +70,11 @@ def index():
 def chat():
     global conversation_history
     user_message = request.json.get("message", "")
-    
+
     # Kết hợp thông tin nền với câu hỏi của khách hàng
     combined_text = quolocstore_info + "\n\nCâu hỏi của khách hàng: " + user_message
 
-    # Thêm tin nhắn của khách hàng vào lịch sử hội thoại với role 'user'
+    # Thêm tin nhắn của khách hàng vào lịch sử hội thoại
     conversation_history.append({
         "role": "user",
         "parts": [{"text": combined_text}]
@@ -91,12 +85,12 @@ def chat():
     }
 
     response = requests.post(url, json=payload, headers=headers)
-    
+
     if response.status_code == 200:
         data = response.json()
         if "candidates" in data and len(data["candidates"]) > 0:
             answer = data["candidates"][0]["content"]["parts"][0]["text"]
-            # Thêm câu trả lời của chatbot vào lịch sử với role 'model'
+            # Thêm câu trả lời của chatbot vào lịch sử
             conversation_history.append({
                 "role": "model",
                 "parts": [{"text": answer}]
@@ -108,4 +102,6 @@ def chat():
         return jsonify({"reply": f"Lỗi: {response.status_code}"}), response.status_code
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000, debug=False)
+    # Lấy cổng từ biến môi trường hoặc mặc định là 5000
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
