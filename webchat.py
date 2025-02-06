@@ -101,4 +101,4 @@ def chat():
         return jsonify({"reply": f"Lỗi: {response.status_code}"}), response.status_code
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000, debug=False)
