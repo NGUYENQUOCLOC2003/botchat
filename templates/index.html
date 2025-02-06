@@ -12,6 +12,108 @@
       height: 100vh;
       overflow: hidden;
     }
+  /* Mặc định cho màn hình lớn (máy tính để bàn) */
+  .chat-container {
+    width: 360px;
+    height: 500px;
+  }
+
+  .chat-button {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .chat-footer input {
+    font-size: 16px;
+  }
+
+  .chat-footer button {
+    font-size: 16px;
+  }
+
+  /* Màn hình vừa (tablet) */
+  @media (max-width: 1024px) {
+    .chat-container {
+      width: 320px;
+      height: 450px;
+    }
+
+    .chat-button {
+      width: 50px;
+      height: 50px;
+      font-size: 22px;
+    }
+
+    .chat-footer input {
+      font-size: 14px;
+    }
+
+    .chat-footer button {
+      font-size: 14px;
+    }
+  }
+
+  /* Màn hình nhỏ (điện thoại di động) */
+  @media (max-width: 768px) {
+    .chat-container {
+      width: 100%;
+      height: 80vh;
+      bottom: 0;
+      right: 0;
+      border-radius: 0;
+    }
+
+    .chat-button {
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+    }
+
+    .chat-header {
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .chat-footer input {
+      font-size: 14px;
+      padding: 10px;
+    }
+
+    .chat-footer button {
+      font-size: 14px;
+      padding: 10px 15px;
+    }
+
+    .bubble {
+      font-size: 13px;
+    }
+  }
+
+  /* Màn hình siêu nhỏ (các thiết bị di động nhỏ hơn 576px) */
+  @media (max-width: 576px) {
+    .chat-container {
+      height: 70vh;
+    }
+
+    .chat-button {
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+    }
+
+    .chat-footer input {
+      font-size: 12px;
+    }
+
+    .chat-footer button {
+      font-size: 12px;
+    }
+
+    .bubble {
+      font-size: 12px;
+    }
+  }
 
     /* Phần tử bao chứa bong bóng chat và khung chat */
     #chat-wrapper {
