@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Quolocstore</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Phần tử bao chứa bong bóng chat và khung chat */
+    #chat-wrapper {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      cursor: move; /* Cho biết phần này có thể kéo thả */
+    }
+
+    /* Bong bóng chat */
+    .chat-button {
+      background: #0084ff;
+      color: #fff;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      user-select: none;
+    }
+
+    /* Khung chat, được đặt tương đối so với chat-wrapper */
+    .chat-container {
+      position: absolute;
+      /* Mặc định: hiển thị phía trên bong bóng chat với cạnh phải căn chỉnh */
+      bottom: 70px;
+      right: 0;
+      width: 360px;
+      height: 500px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-header {
+      background: #0084ff;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #e5ddd5;
+    }
+
+    .message-container {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    /* Style tin nhắn người dùng */
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    /* Style tin nhắn bot */
+    .message.bot {
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      position: relative;
+      line-height: 1.4;
+      font-size: 14px;
+      word-wrap: break-word;
+    }
+
+    .bubble.user {
+      background: #0084ff;
+      color: #fff;
+      border-bottom-right-radius: 0;
+    }
+
+    .bubble.bot {
+      background: #fff;
+      color: #000;
+      border: 1px solid #ccc;
+      border-bottom-left-radius: 0;
+    }
+
+    .chat-footer {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    .chat-footer input {
+      flex: 1;
+      border: none;
+      padding: 15px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .chat-footer button {
+      background: #0084ff;
+      border: none;
+      padding: 15px 20px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .chat-footer button:hover {
+      background: #006bbf;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Phần tử bao chứa bong bóng chat và khung chat -->
+  <div id="chat-wrapper">
+    <!-- Khung chat -->
+    <div class="chat-container" id="chat-container">
+      <div class="chat-header">
+        Chatbot Quolocstore
+      </div>
+      <div id="chat-box" class="chat-box">
+        <!-- Tin nhắn sẽ được hiển thị ở đây -->
+      </div>
+      <div class="chat-footer">
+        <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
+        <button id="send-btn">Gửi</button>
+      </div>
+    </div>
+    <!-- Bong bóng chat -->
+    <div class="chat-button" id="chat-toggle">💬</div>
+  </div>
+
+  <script>
+    // Biến dùng để phân biệt thao tác kéo và click
+    let isDragging = false;
+    let startX, startY;
+    let offsetX, offsetY;
+    const dragThreshold = 5; // Nếu di chuyển vượt quá 5px thì coi là kéo
+
+    const chatWrapper = document.getElementById("chat-wrapper");
+    const chatToggle = document.getElementById("chat-toggle");
+    const chatContainer = document.getElementById("chat-container");
+
+    // Khi nhấn chuột xuống trong chat-wrapper
+    chatWrapper.addEventListener("mousedown", function(e) {
+      isDragging = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = chatWrapper.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    });
+
+    function onMouseMove(e) {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!isDragging && Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+        isDragging = true;
+      }
+      if (isDragging) {
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
+
+        // Giới hạn vị trí di chuyển để không ra ngoài cửa sổ
+        const margin = 10; // Khoảng cách tối thiểu so với các viền màn hình
+        const buttonWidth = chatToggle.offsetWidth;   // kích thước của bong bóng (60px)
+        const buttonHeight = chatToggle.offsetHeight;   // tương tự
+
+        // Giới hạn theo chiều ngang:
+        newX = Math.max(margin, Math.min(newX, window.innerWidth - buttonWidth - margin));
+        // Giới hạn theo chiều dọc:
+        newY = Math.max(margin, Math.min(newY, window.innerHeight - buttonHeight - margin));
+
+        chatWrapper.style.left = newX + "px";
+        chatWrapper.style.top = newY + "px";
+        // Khi sử dụng left/top, vô hiệu hóa right/bottom
+        chatWrapper.style.right = "auto";
+        chatWrapper.style.bottom = "auto";
+      }
+    }
+
+    function onMouseUp(e) {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+
+    // Khi nhấp vào bong bóng chat (nếu không kéo) thì mở/đóng khung chat,
+    // đồng thời điều chỉnh vị trí hiển thị của khung chat để không bị tràn ra ngoài cửa sổ.
+    chatToggle.addEventListener("click", function(e) {
+      if (isDragging) {
+        e.preventDefault();
+        return;
+      }
+
+      // Kích thước cố định của khung chat và bong bóng chat
+      const containerWidth = 360;
+      const containerHeight = 500;
+      const bubbleWidth = chatToggle.offsetWidth;  // 60px
+      const bubbleHeight = chatToggle.offsetHeight;  // 60px
+
+      // Lấy vị trí hiện tại của chat-wrapper (vị trí của bong bóng chat)
+      const rect = chatWrapper.getBoundingClientRect();
+
+      // --- Xét vị trí theo chiều ngang ---
+      const leftSpace = rect.left;
+      const rightSpace = window.innerWidth - rect.right;
+
+      if (leftSpace < (containerWidth - bubbleWidth)) {
+        // Nếu không đủ không gian bên trái, hiển thị khung chat bên phải của bong bóng
+        chatContainer.style.left = "0";
+        chatContainer.style.right = "auto";
+      } else if (rightSpace < (containerWidth - bubbleWidth)) {
+        // Nếu không đủ không gian bên phải, hiển thị khung chat bên trái của bong bóng
+        chatContainer.style.right = "0";
+        chatContainer.style.left = "auto";
+      } else {
+        // Nếu đủ không gian, giữ mặc định (cạnh phải căn)
+        chatContainer.style.right = "0";
+        chatContainer.style.left = "auto";
+      }
+
+      // --- Xét vị trí theo chiều dọc ---
+      if (rect.top < (containerHeight + 70)) {
+        // Nếu quá sát phía trên, hiển thị khung chat phía dưới bong bóng
+        chatContainer.style.top = "70px";
+        chatContainer.style.bottom = "auto";
+      } else if (window.innerHeight - rect.bottom < (containerHeight + 70)) {
+        // Nếu quá sát phía dưới, hiển thị khung chat phía trên bong bóng
+        chatContainer.style.bottom = "70px";
+        chatContainer.style.top = "auto";
+      } else {
+        chatContainer.style.bottom = "70px";
+        chatContainer.style.top = "auto";
+      }
+
+      // Hiển thị/ẩn khung chat
+      chatContainer.style.display = (chatContainer.style.display === "none" || !chatContainer.style.display) ? "flex" : "none";
+    });
+
+    // Xử lý gửi tin nhắn trong khung chat
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    function addMessage(sender, message) {
+      const container = document.createElement("div");
+      container.classList.add("message-container", sender);
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble", sender);
+      bubble.textContent = message;
+
+      container.appendChild(bubble);
+      chatBox.appendChild(container);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendBtn.addEventListener("click", function() {
+      const message = userInput.value;
+      if (!message.trim()) return;
+      addMessage("user", message);
+      userInput.value = "";
+
+      // Giả lập gọi API (thay đổi endpoint cho phù hợp)
+      fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+      })
+      .then(response => response.json())
+      .then(data => {
+        addMessage("bot", data.reply);
+      })
+      .catch(error => {
+        addMessage("bot", "Lỗi: " + error);
+      });
+    });
+
+    userInput.addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+  </script>
+
+</body>
+</html>
