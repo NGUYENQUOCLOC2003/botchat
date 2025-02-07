@@ -114,4 +114,5 @@ def chat():
 if __name__ == "__main__":
     # Lấy cổng từ biến môi trường hoặc mặc định là 5000
     port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port) 
+    
